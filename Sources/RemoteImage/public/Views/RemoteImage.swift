@@ -16,15 +16,12 @@ public struct RemoteImage<ErrorView: View, ImageView: View, LoadingView: View>: 
     private let imageView: (Image) -> ImageView
     private let loadingView: () -> LoadingView
 
-    @ObservedObject private var service = RemoteImageServiceFactory.makeRemoteImageService()
+    @ObservedObject private var service: RemoteImageService
 
     public var body: some View {
         Group {
             if service.state == .loading {
                 loadingView()
-                    .onAppear {
-                        self.service.fetchImage(ofType: self.type)
-                    }
             } else {
                 service.state.error.map { errorView($0) }
 
@@ -38,6 +35,9 @@ public struct RemoteImage<ErrorView: View, ImageView: View, LoadingView: View>: 
         self.errorView = errorView
         self.imageView = imageView
         self.loadingView = loadingView
+        let service = RemoteImageServiceFactory.makeRemoteImageService()
+        service.fetchImage(ofType: type)
+        self.service = service
     }
 }
 
